@@ -424,7 +424,7 @@
             <div class="complaint-text" id="complaint-output"></div>
             <div class="fortune-text" id="fortune-output"></div>
             
-            <p class="instruction">🗣️ Wajib dibacakan dengan penuh penghayatan ke kelompokmu!</p>
+            <p class="instruction">Wajib dibacakan dengan penuh penghayatan ke kelompokmu!</p>
             <button onclick="resetRitual()" style="width: 100%; font-size: 22px;">Kembali ke Menu Utama</button>
         </div>
     </div>
@@ -456,124 +456,160 @@
     </div>
 
     <script>
-        const fortunes = [
-            "IPK-mu semester ini terpantau aman, tapi mentalmu yang perlu di-maintenance. Kurangi overthinking, perbanyak tidur yang berkualitas!",
-            "Akan ada proker dadakan yang bikin grup departemenmu ramai. Tenang, kamu nggak akan kerja sendirian... kamu bakal nyuruh-nyuruh temanmu.",
-            "Jangankan confess ke dia, nge-reply chat di grup panitia aja kamu masih mikir 2 jam. Gas aja, mumpung belum lulus!",
-            "Keberuntunganmu hari ini sedikit macet, persis seperti jalanan depan kampus. Tapi tenang, badai pasti berlalu, meski pelan-pelan.",
-            "Dosen pembimbing/kating akan tiba-tiba nge-chat hari Minggu. Bersiaplah untuk revisi kecil yang meruntuhkan mood rebahanmu.",
-            "Pusing mikirin revisian? Bayangkan pusingnya mikirin tugas numpuk akhir bulan. Semangat, kamu pasti bisa survive di segala rintangan!",
-            "Seseorang dari departemen lain diam-diam kagum dengan etos kerjamu. Siap-siap diajak kolaborasi (atau diajak ngopi bareng).",
-            "Masa depan menunjukkan kamu bakal ngerasa pinter banget pas ngerjain tugas, sampai akhirnya pas di-submit ternyata salah format.",
-            "Akhiran NIM-mu membawa hoki! Sayangnya hokinya cuma buat dapet parkiran kosong, bukan buat dapet balasan cepat dari dosen.",
-            "Kamu akan dimintai tolong sesuatu yang remeh tapi makan waktu. Belajarlah bilang 'maaf lagi sibuk' biar nggak jadi andalan terus.",
-            "Bola kristal melihat tidur siangmu hari ini akan sangat nyenyak. Saking nyenyaknya, kamu hampir kelewatan rapat penting.",
-            "Jangan sedih kalau ide kamu belum diterima. Orang genius memang sering disalahpahami di awal. Tetap percaya diri!"
-        ];
+    let fortuneDataset = {};
 
-        let currentName = "";
-        let currentGuild = "";
-        let currentNim = "";
-        let currentComplaint = "";
+    // Ambil dataset murni dari fortunes.json
+    fetch('fortunes.json')
+        .then(response => response.json())
+        .then(data => {
+            fortuneDataset = data;
+            console.log("Dataset ramalan dari fortunes.json berhasil dimuat.");
+        })
+        .catch(err => {
+            console.error("Gagal memuat fortunes.json! Pastikan file berada di folder yang sama.", err);
+        });
 
-        function switchStep(fromId, toId) {
-            const currentStep = document.getElementById(fromId);
-            const nextStep = document.getElementById(toId);
+    let currentName = "";
+    let currentGuild = "";
+    let currentNim = "";
+    let currentComplaint = "";
 
-            currentStep.classList.remove('active');
-            nextStep.classList.add('active');
+    function switchStep(fromId, toId) {
+        const currentStep = document.getElementById(fromId);
+        const nextStep = document.getElementById(toId);
+
+        currentStep.classList.remove('active');
+        nextStep.classList.add('active');
+    }
+
+    function goToForm() {
+        switchStep('step-home', 'step-form');
+    }
+
+    function openRules() {
+        document.getElementById('rules-modal').style.display = 'flex';
+    }
+
+    function closeRules() {
+        document.getElementById('rules-modal').style.display = 'none';
+    }
+
+    function startRitual() {
+        const nameInput = document.getElementById('adventurer-name').value;
+        const nimInput = document.getElementById('adventurer-nim').value;
+        const guildInput = document.getElementById('adventurer-guild').value;
+        const complaintInput = document.getElementById('adventurer-complaint').value;
+
+        if(nameInput.trim() === "" || complaintInput.trim() === "") {
+            alert("Sang Dukun menolak! Isi namamu dan tumpahkan keluhanmu.");
+            return;
+        }
+        if(nimInput.length !== 3) {
+            alert("Sang Dukun marah! Akhiran NIM wajib diisi TEPAT 3 digit angka.");
+            return;
         }
 
-        function goToForm() {
-            switchStep('step-home', 'step-form');
-        }
+        currentName = nameInput;
+        currentNim = nimInput;
+        currentGuild = guildInput;
+        currentComplaint = complaintInput;
 
-        function openRules() {
-            document.getElementById('rules-modal').style.display = 'flex';
-        }
+        switchStep('step-form', 'step-ball');
+    }
 
-        function closeRules() {
-            document.getElementById('rules-modal').style.display = 'none';
-        }
+    function askConfirmation() {
+        const crystal = document.getElementById('crystal');
+        const loadingText = document.getElementById('loading-text');
+        
+        crystal.classList.add('reading');
+        loadingText.innerText = "Merangkai energi kosmik...";
+        loadingText.style.display = 'block';
 
-        function startRitual() {
-            const nameInput = document.getElementById('adventurer-name').value;
-            const nimInput = document.getElementById('adventurer-nim').value;
-            const guildInput = document.getElementById('adventurer-guild').value;
-            const complaintInput = document.getElementById('adventurer-complaint').value;
+        setTimeout(() => {
+            document.getElementById('confirmation-modal').style.display = 'flex';
+        }, 1500); 
+    }
 
-            if(nameInput.trim() === "" || complaintInput.trim() === "") {
-                alert("Sang Dukun menolak! Isi namamu dan tumpahkan keluhanmu.");
-                return;
-            }
-            if(nimInput.length !== 3) {
-                alert("Sang Dukun marah! Akhiran NIM wajib diisi TEPAT 3 digit angka.");
-                return;
-            }
+    function confirmFate() {
+        document.getElementById('confirmation-modal').style.display = 'none';
+        const loadingText = document.getElementById('loading-text');
+        
+        loadingText.innerText = "Membuka tabir masa depanmu...";
 
-            currentName = nameInput;
-            currentNim = nimInput;
-            currentGuild = guildInput;
-            currentComplaint = complaintInput;
-
-            switchStep('step-form', 'step-ball');
-        }
-
-        function askConfirmation() {
-            const crystal = document.getElementById('crystal');
-            const loadingText = document.getElementById('loading-text');
-            
-            crystal.classList.add('reading');
-            loadingText.innerText = "Merangkai energi kosmik...";
-            loadingText.style.display = 'block';
-
-            setTimeout(() => {
-                document.getElementById('confirmation-modal').style.display = 'flex';
-            }, 1500); 
-        }
-
-        function confirmFate() {
-            document.getElementById('confirmation-modal').style.display = 'none';
-            const loadingText = document.getElementById('loading-text');
-            
-            loadingText.innerText = "Membuka tabir masa depanmu...";
-
-            setTimeout(() => {
-                const crystal = document.getElementById('crystal');
-                crystal.classList.remove('reading');
-                loadingText.style.display = 'none';
-                switchStep('step-ball', 'step-result');
-                showResult();
-            }, 1500);
-        }
-
-        function cancelFate() {
-            document.getElementById('confirmation-modal').style.display = 'none';
+        setTimeout(() => {
             const crystal = document.getElementById('crystal');
             crystal.classList.remove('reading');
-            document.getElementById('loading-text').style.display = 'none';
+            loadingText.style.display = 'none';
+            switchStep('step-ball', 'step-result');
+            showResult();
+        }, 1500);
+    }
+
+    function cancelFate() {
+        document.getElementById('confirmation-modal').style.display = 'none';
+        const crystal = document.getElementById('crystal');
+        crystal.classList.remove('reading');
+        document.getElementById('loading-text').style.display = 'none';
+    }
+
+    /* --- FUNGSI DETEKSI KATA KUNCI (MURNI DATASET) --- */
+    function getFortuneByComplaint(complaintText) {
+        if (!fortuneDataset || Object.keys(fortuneDataset).length === 0) {
+            return "Sang Dukun belum menerima energi dari fortunes.json... Pastikan file dataset sudah siap!";
         }
 
-        function showResult() {
-            const resultName = document.getElementById('result-name');
-            const complaintOutput = document.getElementById('complaint-output');
-            const fortuneOutput = document.getElementById('fortune-output');
+        const text = complaintText.toLowerCase();
 
-            const randomIndex = Math.floor(Math.random() * fortunes.length);
-            const selectedFortune = fortunes[randomIndex];
+        // Kumpulan regex kata kunci
+        const isProker = /proker|panitia|rapat|kating|organisasi|acara|bph|kadiv|danus|spon|sponsorship|presidium|sekre|bendahara|divisi|pj|lpj|evaluasi|korlap|flyer|banner|venue/.test(text);
+        const isAkademik = /tugas|revisi|dosen|dospem|ipk|kuliah|matkul|uts|uas|laporan|laprak|praktikum|deadliner|skripsi|krs|kuis|nilai|presensi|slide|presentasi|perpustakaan|lab/.test(text);
+        const isCapek = /capek|cape|lelah|pusing|tidur|stress|stres|mental|mager|pengen libur|encok|hampa|pasrah|muak|penat|pegal|healing|refleksi|overthinking/.test(text);
+        const isCinta = /confess|pacar|doi|gebetan|crush|cinta|jodoh|suka|mantan|single|jomblo|nembak|chat|love|relationship|salting|saling tatap/.test(text);
+        const isUang = /uang|duit|dompet|miskin|hemat|jajan|krispi|bokek|saldomu|bayar|kas|biaya|gaji|boba|kopi|cafe|rekening|checkout|traktiran|hutang/.test(text);
 
-            resultName.innerHTML = `Wahai <b>${currentName}</b> (NIM ...${currentNim})<br>dari ${currentGuild},`;
-            complaintOutput.innerHTML = `Semesta telah mendengar keluhanmu soal:<br> <i>"${currentComplaint}"</i><br><br>Dan bola kristal berkata...`;
-            fortuneOutput.innerHTML = `<i>"${selectedFortune}"</i>`;
+        let pool = [];
+
+        if (isProker && fortuneDataset.proker) pool = pool.concat(fortuneDataset.proker);
+        if (isAkademik && fortuneDataset.akademik) pool = pool.concat(fortuneDataset.akademik);
+        if (isCapek && fortuneDataset.capek) pool = pool.concat(fortuneDataset.capek);
+        if (isCinta && fortuneDataset.cinta) pool = pool.concat(fortuneDataset.cinta);
+        if (isUang && fortuneDataset.uang) pool = pool.concat(fortuneDataset.uang);
+
+        // Jika keluhan bebas/tidak ada kata kunci spesifik yang cocok, ambil dari kategori umum
+        if (pool.length === 0 && fortuneDataset.umum) {
+            pool = fortuneDataset.umum;
         }
 
-        function resetRitual() {
-            document.getElementById('adventurer-name').value = "";
-            document.getElementById('adventurer-nim').value = "";
-            document.getElementById('adventurer-complaint').value = "";
-            
-            switchStep('step-result', 'step-home');
+        // Jika kategori umum pun kosong, gabungkan seluruh ramalan yang ada di dataset
+        if (pool.length === 0) {
+            Object.values(fortuneDataset).forEach(arr => {
+                if (Array.isArray(arr)) pool = pool.concat(arr);
+            });
         }
-    </script>
+
+        const randomIndex = Math.floor(Math.random() * pool.length);
+        return pool[randomIndex];
+    }
+
+    function showResult() {
+        const resultName = document.getElementById('result-name');
+        const complaintOutput = document.getElementById('complaint-output');
+        const fortuneOutput = document.getElementById('fortune-output');
+
+        const selectedFortune = getFortuneByComplaint(currentComplaint);
+
+        resultName.innerHTML = `Wahai <b>${currentName}</b> (NIM ...${currentNim})<br>dari ${currentGuild},`;
+        complaintOutput.innerHTML = `Semesta telah mendengar keluhanmu soal:<br> <i>"${currentComplaint}"</i><br><br>Dan bola kristal berkata...`;
+        fortuneOutput.innerHTML = `<i>"${selectedFortune}"</i>`;
+    }
+
+    function resetRitual() {
+        document.getElementById('adventurer-name').value = "";
+        document.getElementById('adventurer-nim').value = "";
+        document.getElementById('adventurer-complaint').value = "";
+        
+        switchStep('step-result', 'step-home');
+    }
+</script>
 </body>
 </html>
