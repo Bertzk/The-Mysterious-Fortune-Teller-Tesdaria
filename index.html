@@ -656,8 +656,8 @@
             
             <p id="loading-text" style="display: none; color: var(--text-gold); font-style: italic; font-size: 20px; margin-top: 15px;">Memanggil energi semesta...</p>
             
-            <!-- TOMBOL KEMBALI JIKA DATA TIDAK COCOK -->
-            <button onclick="backToFormFromBall()" class="btn-cancel" style="margin-top: 18px; width: 60%; font-size: 17px; padding: 12px;">↩ Ubah Data / Data Tidak Cocok</button>
+            <!-- TOMBOL KEMBALI JIKA DATA TIDAK COCOK (ID DITAMBAHKAN AGAR BISA DI-HIDE) -->
+            <button id="btn-back-ball" onclick="backToFormFromBall()" class="btn-cancel" style="margin-top: 18px; width: 60%; font-size: 25px; padding: 12px;">Ubah Data</button>
         </div>
 
         <!-- STEP 3: HASIL RAMALAN -->
@@ -835,7 +835,6 @@
             const guildInput = document.getElementById('adventurer-guild').value;
             const complaintInput = document.getElementById('adventurer-complaint').value;
 
-            // Menggunakan notifikasi kustom inbuilt alih-alih alert bawaan Chrome
             if(nameInput.trim() === "" || complaintInput.trim() === "") {
                 showCustomAlert("Sang Dukun menolak! Isi namamu dan tumpahkan keluhanmu dengan benar.");
                 return;
@@ -850,6 +849,9 @@
             currentGuild = guildInput;
             currentComplaint = complaintInput;
 
+            // Pastikan tombol Ubah Data muncul kembali setiap masuk halaman dukun dari form
+            document.getElementById('btn-back-ball').style.display = 'inline-block';
+
             switchStep('step-form', 'step-ball');
         }
 
@@ -861,6 +863,9 @@
             crystal.classList.add('reading');
             loadingText.innerText = "Merangkai energi kosmik...";
             loadingText.style.display = 'block';
+
+            // SEMBUNYIKAN TOMBOL "Ubah Data" KETIKA BOLA DIKLIK
+            document.getElementById('btn-back-ball').style.display = 'none';
 
             setTimeout(() => {
                 document.getElementById('confirmation-modal').style.display = 'flex';
@@ -915,6 +920,9 @@
             const crystal = document.getElementById('crystal');
             crystal.classList.remove('reading', 'intense');
             document.getElementById('loading-text').style.display = 'none';
+            
+            // JIKA USER KLIK "Ampun, Takut" (BATAL) PADA MODAL, MUNCULKAN KEMBALI TOMBOL UBAH DATA
+            document.getElementById('btn-back-ball').style.display = 'inline-block';
         }
 
         /* --- FUNGSI DETEKSI KATA KUNCI --- */
