@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Mysterious Fortune Teller - Tesdaria</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
 
         :root {
             --bg-color: #150a21;
             --text-gold: #ffd700;
             --text-light: #e0d8ea;
+            --accent-purple: #7e22ce;
         }
 
         body {
@@ -26,7 +27,7 @@
             text-align: center;
             overflow-x: hidden; 
             
-            background: linear-gradient(rgba(21, 10, 33, 0.75), rgba(16, 5, 26, 0.85)), url('background.png');
+            background: linear-gradient(rgba(15, 6, 26, 0.8), rgba(10, 3, 20, 0.9)), url('background.png');
             background-size: cover;
             background-position: center;
         }
@@ -34,11 +35,34 @@
         h1, h2, h3 {
             font-family: 'Cinzel', serif;
             color: var(--text-gold);
-            text-shadow: 2px 2px 6px rgba(0,0,0,0.9);
+            text-shadow: 0 0 12px rgba(255, 215, 0, 0.4), 2px 2px 8px rgba(0,0,0,0.9);
             margin-bottom: 12px;
+            letter-spacing: 1px;
         }
 
-        /* --- CONTAINER UTAMA --- */
+        /* --- CONTROL MUTE AUDIO --- */
+        .audio-control {
+            position: fixed;
+            top: 20px;
+            right: 25px;
+            z-index: 10000;
+            background: rgba(18, 8, 28, 0.7);
+            border: 1px solid var(--text-gold);
+            color: var(--text-gold);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+        .audio-control:hover {
+            background: var(--text-gold);
+            color: #000;
+        }
+
+        /* --- CONTAINER UTAMA & GLASSMORPHISM UI --- */
         .app-container {
             position: relative;
             width: 95%;
@@ -55,15 +79,19 @@
             width: 100%;
             opacity: 0;
             visibility: hidden;
-            transform: scale(0.97) translateY(10px);
-            transition: opacity 0.5s ease, transform 0.5s ease, visibility 0.5s ease;
-            background: rgba(20, 10, 30, 0.90);
+            transform: scale(0.96) translateY(12px);
+            transition: opacity 0.6s ease, transform 0.6s ease, visibility 0.6s ease;
+            
+            background: rgba(18, 8, 28, 0.85);
             padding: 45px 50px;
             box-sizing: border-box;
-            border-radius: 24px;
-            border: 2px solid #4b0082;
-            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(12px);
+            border-radius: 28px;
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9), 
+                        0 0 30px rgba(126, 34, 206, 0.35),
+                        inset 0 0 20px rgba(255, 215, 0, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             z-index: 1;
             max-height: 90vh;
             overflow-y: auto;
@@ -76,7 +104,7 @@
             z-index: 2;
         }
 
-        /* --- KHUSUS STEP FORM AGAR TIDAK BISA DISKROL --- */
+        /* --- KHUSUS STEP FORM --- */
         #step-form {
             overflow: hidden !important;
             padding: 30px 45px !important;
@@ -106,7 +134,7 @@
             padding: 14px 24px !important;
         }
 
-        /* --- KHUSUS STEP RESULT AGAR TIDAK BISA DISKROL & TEKS LEBIH BESAR --- */
+        /* --- KHUSUS STEP RESULT --- */
         #step-result {
             overflow: hidden !important;
             padding: 24px 35px !important;
@@ -133,6 +161,9 @@
             line-height: 1.5 !important;
             margin: 10px 0 !important;
             padding: 18px 24px !important;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            background: rgba(10, 4, 18, 0.85);
+            box-shadow: 0 0 25px rgba(126, 34, 206, 0.4), inset 0 0 15px rgba(0, 0, 0, 0.8);
         }
 
         #step-result .instruction {
@@ -152,24 +183,39 @@
             border: none;
             box-shadow: none;
             backdrop-filter: none;
+            -webkit-backdrop-filter: none;
             max-width: 100vw;
             overflow: visible; 
         }
 
-        /* --- ELEMENT FORM GENERAL --- */
+        /* --- ELEMENT FORM STYLING --- */
         input, select, textarea {
             width: 100%;
             box-sizing: border-box;
-            border: 2px solid var(--text-gold);
-            background: rgba(0, 0, 0, 0.75);
+            border: 1.5px solid rgba(255, 215, 0, 0.5);
+            background: rgba(8, 3, 14, 0.75);
             color: var(--text-gold);
             font-family: 'Lora', serif;
-            border-radius: 10px;
+            border-radius: 12px;
             outline: none;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
+            cursor: pointer;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--text-gold);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.4), inset 0 2px 6px rgba(0,0,0,0.8);
+            background: rgba(12, 5, 20, 0.9);
         }
         
         textarea {
             resize: none;
+            cursor: text;
+        }
+
+        input[type="text"] {
+            cursor: text;
         }
 
         .input-group {
@@ -181,11 +227,12 @@
             margin-left: 2px;
             font-weight: 600;
             color: #d1b3ff;
+            letter-spacing: 0.5px;
         }
         
-        /* --- TOMBOL --- */
+        /* --- TOMBOL MISTIS --- */
         button {
-            background-color: transparent;
+            background: linear-gradient(135deg, rgba(75, 0, 130, 0.3), rgba(21, 10, 33, 0.6));
             color: var(--text-gold);
             border: 2px solid var(--text-gold);
             padding: 16px 36px;
@@ -193,26 +240,29 @@
             font-family: 'Cinzel', serif;
             font-weight: 700;
             cursor: pointer;
-            border-radius: 10px;
-            transition: all 0.3s ease;
+            border-radius: 12px;
+            transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
             margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 215, 0, 0.2);
         }
         
         button:hover {
-            background-color: var(--text-gold);
+            background: var(--text-gold);
             color: var(--bg-color);
-            box-shadow: 0 0 25px var(--text-gold);
-            transform: scale(1.03);
+            box-shadow: 0 0 30px var(--text-gold), 0 0 15px rgba(255, 215, 0, 0.8);
+            transform: translateY(-2px) scale(1.02);
         }
 
         .btn-rules {
-            background-color: rgba(75, 0, 130, 0.5);
+            background: rgba(75, 0, 130, 0.4);
+            border-color: #a855f7;
+            color: #e0d8ea;
         }
         .btn-rules:hover {
-            background-color: rgba(107, 33, 168, 0.9) !important;
-            color: var(--text-gold) !important;
+            background: rgba(147, 51, 234, 0.9) !important;
+            color: #fff !important;
             border-color: var(--text-gold);
-            box-shadow: 0 0 25px var(--text-gold);
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.8);
         }
 
         /* --- PENGATURAN PORTAL DAN DUKUN --- */
@@ -231,15 +281,15 @@
             transform: translateX(-50%);
             width: 420px;
             height: 500px;
-            border: 4px solid #6b21a8;
-            border-bottom: 8px solid var(--text-gold);
+            border: 3px solid #7e22ce;
+            border-bottom: 6px solid var(--text-gold);
             border-radius: 210px 210px 24px 24px; 
             
             background: linear-gradient(rgba(16, 5, 26, 0.55), rgba(16, 5, 26, 0.75)), url('ruang_dukun.png');
             background-size: cover;
             background-position: center;
             
-            box-shadow: 0 0 40px rgba(107, 33, 168, 0.75), inset 0 0 35px rgba(0,0,0,0.9);
+            box-shadow: 0 0 45px rgba(126, 34, 206, 0.8), inset 0 0 40px rgba(0,0,0,0.95);
             z-index: 1;
             overflow: hidden; 
         }
@@ -252,6 +302,28 @@
             width: 165%; 
             height: auto;
             z-index: 1; 
+            transform-origin: bottom center;
+            will-change: transform;
+            transition: transform 0.15s ease-out;
+            animation: dukunBreathing 4.5s ease-in-out infinite, dukunSway 4s ease-in-out infinite;
+        }
+
+        @keyframes dukunBreathing {
+            0%, 100% {
+                transform: translateX(var(--mouse-x, -50%)) translateY(var(--mouse-y, 0px)) scale(1);
+            }
+            50% {
+                transform: translateX(var(--mouse-x, -50%)) translateY(calc(var(--mouse-y, 0px) - 2px)) scale(1.008, 1.012);
+            }
+        }
+
+        @keyframes dukunSway {
+            0%, 100% {
+                filter: drop-shadow(0 0 10px rgba(147, 51, 234, 0.5));
+            }
+            50% {
+                filter: drop-shadow(0 0 18px rgba(168, 85, 247, 0.8));
+            }
         }
 
         .crystal-wrapper {
@@ -273,46 +345,135 @@
             object-fit: contain; 
             cursor: pointer;
             transition: transform 0.3s ease, filter 0.3s ease;
+            will-change: transform, filter;
         }
         
         .crystal-ball:hover {
-            transform: scale(1.1);
-            filter: drop-shadow(0 0 30px #c084fc) drop-shadow(0 0 50px #9333ea) brightness(1.2);
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 25px #c084fc) drop-shadow(0 0 45px #9333ea) brightness(1.2);
         }
         
+        /* GUNCANGAN NATURAL */
         .crystal-ball.reading {
-            animation: shake 0.4s infinite, rgbGlow 1.5s infinite linear;
+            animation: naturalShake 0.4s infinite cubic-bezier(0.36, 0.07, 0.19, 0.97), rgbGlow 1.6s infinite linear;
+        }
+
+        .crystal-ball.intense {
+            animation: naturalSuperShake 0.15s infinite cubic-bezier(0.36, 0.07, 0.19, 0.97), superGlow 0.6s infinite linear !important;
         }
 
         @keyframes floatTogether {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-8px); }
         }
-        
-        @keyframes shake {
-            0%, 100% { transform: translate(1px, 1px) rotate(0deg); }
-            20% { transform: translate(-3px, 0px) rotate(1deg); }
-            40% { transform: translate(2px, -2px) rotate(-1deg); }
-            60% { transform: translate(-3px, 2px) rotate(0deg); }
-            80% { transform: translate(2px, 2px) rotate(1deg); }
+
+        @keyframes naturalShake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            20% { transform: translate(-1.5px, 1px) rotate(-0.8deg); }
+            40% { transform: translate(1.5px, -1px) rotate(0.6deg); }
+            60% { transform: translate(-1px, -1px) rotate(-0.4deg); }
+            80% { transform: translate(1px, 1.5px) rotate(0.8deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+
+        @keyframes naturalSuperShake {
+            0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            25% { transform: translate(-3.5px, 2px) rotate(-1.8deg) scale(1.02); }
+            50% { transform: translate(3px, -2.5px) rotate(1.5deg) scale(0.99); }
+            75% { transform: translate(-2px, -3px) rotate(-1.2deg) scale(1.01); }
+            100% { transform: translate(2.5px, 3px) rotate(1.8deg) scale(1); }
         }
 
         @keyframes rgbGlow {
-            0% {
-                filter: drop-shadow(0 0 30px #a855f7) drop-shadow(0 0 60px #ec4899) brightness(1.3) hue-rotate(0deg);
+            0% { filter: drop-shadow(0 0 25px #a855f7) drop-shadow(0 0 50px #ec4899) brightness(1.3) hue-rotate(0deg); }
+            33% { filter: drop-shadow(0 0 30px #3b82f6) drop-shadow(0 0 55px #8b5cf6) brightness(1.4) hue-rotate(90deg); }
+            66% { filter: drop-shadow(0 0 30px #f43f5e) drop-shadow(0 0 55px #d946ef) brightness(1.4) hue-rotate(200deg); }
+            100% { filter: drop-shadow(0 0 25px #a855f7) drop-shadow(0 0 50px #ec4899) brightness(1.3) hue-rotate(360deg); }
+        }
+
+        @keyframes superGlow {
+            0% { 
+                filter: drop-shadow(0 0 35px #ec4899) drop-shadow(0 0 70px #a855f7) drop-shadow(0 0 100px #3b82f6) brightness(2) hue-rotate(0deg); 
             }
-            33% {
-                filter: drop-shadow(0 0 35px #3b82f6) drop-shadow(0 0 65px #8b5cf6) brightness(1.4) hue-rotate(90deg);
-            }
-            66% {
-                filter: drop-shadow(0 0 35px #f43f5e) drop-shadow(0 0 65px #d946ef) brightness(1.4) hue-rotate(200deg);
-            }
-            100% {
-                filter: drop-shadow(0 0 30px #a855f7) drop-shadow(0 0 60px #ec4899) brightness(1.3) hue-rotate(360deg);
+            100% { 
+                filter: drop-shadow(0 0 50px #ffd700) drop-shadow(0 0 95px #ec4899) drop-shadow(0 0 130px #8b5cf6) brightness(2.8) hue-rotate(360deg); 
             }
         }
 
-        /* --- MODAL POP-UP --- */
+        /* --- EFEK VIGNETTE --- */
+        .vignette-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9990;
+            background: radial-gradient(circle at center, transparent 30%, rgba(4, 1, 10, 0.96) 88%);
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            will-change: opacity;
+        }
+
+        .vignette-overlay.active {
+            opacity: 1;
+        }
+
+        /* --- OVERLAY PANCARAN FLARE PNG --- */
+        .flare-burst-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+            will-change: opacity;
+        }
+
+        .flare-burst-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .flare-burst-overlay.fade-out {
+            opacity: 0;
+            transition: opacity 1s ease-out;
+        }
+
+        .flare-img {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            object-fit: contain;
+            mix-blend-mode: screen; 
+            transform: translate(-50%, -50%) scale(0) rotate(0deg);
+            transform-origin: center center;
+            will-change: transform, opacity;
+        }
+
+        .flare-burst-overlay.active .flare-img {
+            animation: expandFlare 3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes expandFlare {
+            0% {
+                transform: translate(-50%, -50%) scale(0.1) rotate(0deg);
+                opacity: 0.2;
+            }
+            35% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(28) rotate(50deg);
+                opacity: 1;
+            }
+        }
+
+        /* --- MODAL POP-UP GLASSED --- */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -321,17 +482,18 @@
             z-index: 100;
             justify-content: center;
             align-items: center;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
         }
 
         .modal-box {
-            background: #150a21;
+            background: rgba(18, 8, 28, 0.92);
             padding: 40px 35px;
-            border: 2px solid var(--text-gold);
-            border-radius: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            border-radius: 24px;
             max-width: 580px;
             width: 90%;
-            box-shadow: 0 0 60px #4b0082;
+            box-shadow: 0 0 60px rgba(126, 34, 206, 0.6);
             text-align: left;
         }
 
@@ -351,10 +513,11 @@
         .btn-cancel {
             border-color: #ff4444; 
             color: #ff4444;
+            background: rgba(255, 68, 68, 0.1);
         }
         .btn-cancel:hover {
-            background: #ff4444;
-            color: #fff;
+            background: #ff4444 !important;
+            color: #fff !important;
             box-shadow: 0 0 20px #ff4444;
         }
 
@@ -372,11 +535,8 @@
             line-height: 1.6;
             margin: 20px 0;
             padding: 25px 30px;
-            border: 2px solid #6b21a8;
-            background: rgba(0, 0, 0, 0.75);
             border-radius: 16px;
             color: #fff;
-            box-shadow: inset 0 0 20px rgba(107, 33, 168, 0.5);
         }
         
         .instruction {
@@ -389,6 +549,23 @@
     </style>
 </head>
 <body>
+
+    <!-- CONTROL SUARA MUTE / UNMUTE -->
+    <button id="toggle-sound" class="audio-control" onclick="toggleAudio()">🔊 Audio: ON</button>
+
+    <!-- ELEMEN AUDIO (BGM & SFX) -->
+    <audio id="bgm" src="bgm_mystic.mp3" loop></audio>
+    <audio id="sfx-click" src="mouse_click.mp3"></audio>
+    <audio id="sfx-touch" src="sfx_crystal_touch.mp3"></audio>
+    <audio id="sfx-burst" src="sfx_burst.mp3"></audio>
+
+    <!-- EFEK VIGNETTE LAYAR PENUH -->
+    <div id="vignette" class="vignette-overlay"></div>
+
+    <!-- OVERLAY PANCARAN FLARE PNG -->
+    <div id="flare-overlay" class="flare-burst-overlay">
+        <img class="flare-img" id="flare-element" src="flare.png" alt="Flare Light">
+    </div>
 
     <div class="app-container">
         <!-- STEP 0: MENU UTAMA -->
@@ -417,16 +594,16 @@
             
             <div class="input-group">
                 <label for="adventurer-guild">Departemen / Asal Party-mu?</label>
-                <select id="adventurer-guild">
+                <select id="adventurer-guild" onmousedown="playSFX(sfxClick)" onchange="playSFX(sfxClick)">
                     <option value="Badan Pengurus Harian (BPH)">Badan Pengurus Harian (BPH)</option>
-                    <option value="Ekonomi Kreatif">Ekonomi Kreatif</option>
-                    <option value="Hubungan Antarlembaga dan Masyarakat">Hubungan Antarlembaga dan Masyarakat</option>
-                    <option value="Kesejahteraan Mahasiswa">Kesejahteraan Mahasiswa</option>
-                    <option value="Media dan Informasi">Media dan Informasi</option>
-                    <option value="Pengembangan Minat dan Bakat">Pengembangan Minat dan Bakat</option>
-                    <option value="Pengembangan Sumber Daya Manusia">Pengembangan Sumber Daya Manusia</option>
-                    <option value="Riset dan Keilmuan">Riset dan Keilmuan</option>
-                    <option value="Sosial dan Pengabdian Masyarakat">Sosial dan Pengabdian Masyarakat</option>
+                    <option value="Ekonomi Kreatif (Ekraf)">Ekonomi Kreatif (Ekraf)</option>
+                    <option value="Hubungan Antarlembaga dan Masyarakat (Halma)">Hubungan Antarlembaga dan Masyarakat (Halma)</option>
+                    <option value="Kesejahteraan Mahasiswa (Kesma)">Kesejahteraan Mahasiswa (Kesma)</option>
+                    <option value="Media dan Informasi (Medinfo)">Media dan Informasi (Medinfo)</option>
+                    <option value="Pengembangan Minat dan Bakat (Pemikat)">Pengembangan Minat dan Bakat (Pemikat)</option>
+                    <option value="Pengembangan Sumber Daya Manusia (PSDM)">Pengembangan Sumber Daya Manusia (PSDM)</option>
+                    <option value="Riset dan Keilmuan (Riskel)">Riset dan Keilmuan (Riskel)</option>
+                    <option value="Sosial dan Pengabdian Masyarakat (Sigma)">Sosial dan Pengabdian Masyarakat (Sigma)</option>
                     <option value="Lainnya">Pengembara Independen</option>
                 </select>
             </div>
@@ -449,7 +626,7 @@
             
             <div class="dukun-container">
                 <div class="dukun-frame">
-                    <img class="dukun-img" src="Dukun_aseli_pekalongan.png" alt="Sang Dukun">
+                    <img class="dukun-img" id="dukun-character" src="Dukun_aseli_pekalongan.png" alt="Sang Dukun">
                     <div class="crystal-wrapper">
                         <img class="crystal-ball" id="crystal" src="Bola_yang_harusnya_jadi_biji_nya_wowok.png" onclick="askConfirmation()" alt="Bola Kristal">
                     </div>
@@ -500,8 +677,8 @@
 
     <script>
         let fortuneDataset = {};
+        let isAudioMuted = false;
 
-        // Ambil dataset murni dari fortunes.json
         fetch('fortunes.json')
             .then(response => response.json())
             .then(data => {
@@ -512,10 +689,70 @@
                 console.error("Gagal memuat fortunes.json! Pastikan file berada di folder yang sama.", err);
             });
 
+        /* --- LOGIKA PENGELOLAAN AUDIO --- */
+        const bgm = document.getElementById('bgm');
+        const sfxClick = document.getElementById('sfx-click');
+        const sfxTouch = document.getElementById('sfx-touch');
+        const sfxBurst = document.getElementById('sfx-burst');
+
+        bgm.volume = 0.35;
+        sfxClick.volume = 0.6;
+        sfxTouch.volume = 0.7;
+        sfxBurst.volume = 0.9;
+
+        // SFX Klik global untuk SEMUA elemen tombol
+        document.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON' && e.target.id !== 'toggle-sound') {
+                playSFX(sfxClick);
+            }
+        });
+
+        function toggleAudio() {
+            const btn = document.getElementById('toggle-sound');
+            isAudioMuted = !isAudioMuted;
+
+            if (isAudioMuted) {
+                bgm.pause();
+                btn.innerText = "🔇 Audio: OFF";
+                btn.style.borderColor = "#ff4444";
+                btn.style.color = "#ff4444";
+            } else {
+                bgm.play().catch(() => {});
+                btn.innerText = "🔊 Audio: ON";
+                btn.style.borderColor = "var(--text-gold)";
+                btn.style.color = "var(--text-gold)";
+            }
+        }
+
+        function playSFX(audioElement) {
+            if (!isAudioMuted && audioElement) {
+                audioElement.currentTime = 0;
+                audioElement.play().catch(() => {});
+            }
+        }
+
         let currentName = "";
         let currentGuild = "";
         let currentNim = "";
         let currentComplaint = "";
+
+        /* --- PELACAKAN KURSOR THROTTLED --- */
+        let ticking = false;
+        document.addEventListener('mousemove', (e) => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const dukun = document.getElementById('dukun-character');
+                    if (dukun) {
+                        const mouseX = (e.clientX / window.innerWidth - 0.5) * 16;
+                        const mouseY = (e.clientY / window.innerHeight - 0.5) * 8;
+                        dukun.style.setProperty('--mouse-x', `calc(-50% + ${mouseX}px)`);
+                        dukun.style.setProperty('--mouse-y', `${mouseY}px`);
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
 
         function switchStep(fromId, toId) {
             const currentStep = document.getElementById(fromId);
@@ -526,6 +763,10 @@
         }
 
         function goToForm() {
+            // PAKSA BGM LANGSUNG NYALA SAAT TOMBOL PERTAMA DIKLIK (Bypass policy browser)
+            if (!isAudioMuted) {
+                bgm.play().catch(err => console.log("Gagal memutar BGM:", err));
+            }
             switchStep('step-home', 'step-form');
         }
 
@@ -537,6 +778,10 @@
         }
 
         function openRules() {
+            // Paksa BGM nyala juga jika tombol rules diklik duluan
+            if (!isAudioMuted) {
+                bgm.play().catch(() => {});
+            }
             document.getElementById('rules-modal').style.display = 'flex';
         }
 
@@ -571,38 +816,67 @@
             const crystal = document.getElementById('crystal');
             const loadingText = document.getElementById('loading-text');
             
+            playSFX(sfxTouch);
             crystal.classList.add('reading');
             loadingText.innerText = "Merangkai energi kosmik...";
             loadingText.style.display = 'block';
 
             setTimeout(() => {
                 document.getElementById('confirmation-modal').style.display = 'flex';
-            }, 1500); 
+            }, 1000); 
         }
 
         function confirmFate() {
             document.getElementById('confirmation-modal').style.display = 'none';
-            const loadingText = document.getElementById('loading-text');
             
-            loadingText.innerText = "Membuka tabir masa depanmu...";
+            const flareOverlay = document.getElementById('flare-overlay');
+            const flareImg = document.getElementById('flare-element');
+            const vignetteOverlay = document.getElementById('vignette');
+            const crystal = document.getElementById('crystal');
+            const loadingText = document.getElementById('loading-text');
+
+            vignetteOverlay.classList.add('active');
+            crystal.classList.add('intense');
+            loadingText.innerText = "MENYINGKAP TABIR TAKDIR...";
 
             setTimeout(() => {
-                const crystal = document.getElementById('crystal');
-                crystal.classList.remove('reading');
-                loadingText.style.display = 'none';
-                switchStep('step-ball', 'step-result');
-                showResult();
-            }, 1500);
+                const crystalRect = crystal.getBoundingClientRect();
+                const centerX = crystalRect.left + (crystalRect.width / 2);
+                const centerY = crystalRect.top + (crystalRect.height / 2);
+
+                flareImg.style.left = `${centerX}px`;
+                flareImg.style.top = `${centerY}px`;
+
+                playSFX(sfxBurst); 
+
+                flareOverlay.classList.remove('fade-out');
+                flareOverlay.classList.add('active');
+
+                setTimeout(() => {
+                    crystal.classList.remove('reading', 'intense');
+                    loadingText.style.display = 'none';
+                    switchStep('step-ball', 'step-result');
+                    showResult();
+
+                    setTimeout(() => {
+                        flareOverlay.classList.add('fade-out');
+                        vignetteOverlay.classList.remove('active');
+                        setTimeout(() => {
+                            flareOverlay.classList.remove('active', 'fade-out');
+                        }, 1000);
+                    }, 400);
+                }, 2400);
+            }, 800);
         }
 
         function cancelFate() {
             document.getElementById('confirmation-modal').style.display = 'none';
             const crystal = document.getElementById('crystal');
-            crystal.classList.remove('reading');
+            crystal.classList.remove('reading', 'intense');
             document.getElementById('loading-text').style.display = 'none';
         }
 
-        /* --- FUNGSI DETEKSI KATA KUNCI (MURNI DATASET) --- */
+        /* --- FUNGSI DETEKSI KATA KUNCI --- */
         function getFortuneByComplaint(complaintText) {
             if (!fortuneDataset || Object.keys(fortuneDataset).length === 0) {
                 return "Sang Dukun belum menerima energi dari MBG, sehingga takdirmu masih misterius. Cobalah lagi nanti.";
@@ -610,7 +884,6 @@
 
             const text = complaintText.toLowerCase();
 
-            // Kumpulan regex kata kunci
             const isProker = /proker|panitia|rapat|kating|organisasi|acara|bph|kadiv|danus|spon|sponsorship|presidium|sekre|bendahara|divisi|pj|lpj|evaluasi|korlap|flyer|banner|venue/.test(text);
             const isAkademik = /tugas|revisi|dosen|dospem|ipk|kuliah|matkul|uts|uas|laporan|laprak|praktikum|deadliner|skripsi|krs|kuis|nilai|presensi|slide|presentasi|perpustakaan|lab/.test(text);
             const isCapek = /capek|cape|lelah|pusing|tidur|stress|stres|mental|mager|pengen libur|encok|hampa|pasrah|muak|penat|pegal|healing|refleksi|overthinking/.test(text);
@@ -625,12 +898,10 @@
             if (isCinta && fortuneDataset.cinta) pool = pool.concat(fortuneDataset.cinta);
             if (isUang && fortuneDataset.uang) pool = pool.concat(fortuneDataset.uang);
 
-            // Jika keluhan bebas/tidak ada kata kunci spesifik yang cocok, ambil dari kategori umum
             if (pool.length === 0 && fortuneDataset.umum) {
                 pool = fortuneDataset.umum;
             }
 
-            // Jika kategori umum pun kosong, gabungkan seluruh ramalan yang ada di dataset
             if (pool.length === 0) {
                 Object.values(fortuneDataset).forEach(arr => {
                     if (Array.isArray(arr)) pool = pool.concat(arr);
@@ -648,7 +919,14 @@
 
             const selectedFortune = getFortuneByComplaint(currentComplaint);
 
-            resultName.innerHTML = `Wahai <b>${currentName}</b> (NIM ...${currentNim})<br>dari departemen ${currentGuild},`;
+            let guildText = "";
+            if (currentGuild === "Pengembara Independen" || currentGuild === "Lainnya") {
+                guildText = "seorang <b>Pengembara dari Dunia Luar</b>,";
+            } else {
+                guildText = `dari departemen <b>${currentGuild}</b>,`;
+            }
+
+            resultName.innerHTML = `Wahai <b>${currentName}</b> (NIM ...${currentNim})<br>${guildText}`;
             complaintOutput.innerHTML = `Semesta telah mendengar keluhanmu soal:<br> <i>"${currentComplaint}"</i><br><br>Dan bola kristal berkata...`;
             fortuneOutput.innerHTML = `<i>"${selectedFortune}"</i>`;
         }
