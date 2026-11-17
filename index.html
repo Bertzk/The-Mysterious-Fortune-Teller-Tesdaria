@@ -1428,6 +1428,122 @@
             font-size: 14px;
         }
 
+        .cam-top-bar {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 15;
+            display: flex;
+            gap: 8px;
+            pointer-events: auto;
+        }
+
+        .cam-icon-btn {
+            background: rgba(14, 6, 26, 0.78);
+            border: 1px solid rgba(245, 208, 97, 0.65);
+            color: var(--gold-primary);
+            border-radius: 50px;
+            padding: 6px 11px;
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            backdrop-filter: blur(6px);
+            transition: all 0.2s ease;
+        }
+
+        .cam-icon-btn.active {
+            background: var(--gold-primary);
+            color: #140624;
+            box-shadow: 0 0 12px rgba(245, 208, 97, 0.7);
+        }
+
+        .cam-tools-panel {
+            width: min(380px, 92vw);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .cam-zoom-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(16, 7, 28, 0.85);
+            border: 1px solid rgba(245, 208, 97, 0.35);
+            border-radius: 50px;
+            padding: 6px 14px;
+        }
+
+        .cam-zoom-row span {
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            color: var(--gold-primary);
+            min-width: 44px;
+        }
+
+        .cam-zoom-row input[type="range"] {
+            flex: 1;
+            padding: 0;
+            height: 4px;
+            accent-color: var(--gold-primary);
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            box-shadow: none;
+        }
+
+        .cam-filter-row {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            padding: 2px 0;
+        }
+
+        .cam-filter-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .cam-filter-pill {
+            flex-shrink: 0;
+            background: rgba(20, 8, 36, 0.85);
+            border: 1px solid rgba(245, 208, 97, 0.35);
+            color: #e2d1f9;
+            border-radius: 50px;
+            padding: 6px 12px;
+            font-family: 'Cinzel', serif;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .cam-filter-pill.active {
+            background: linear-gradient(180deg, var(--gold-primary), #d4a328);
+            color: #140624;
+            border-color: var(--gold-bright);
+            font-weight: 700;
+            box-shadow: 0 0 12px rgba(245, 208, 97, 0.45);
+        }
+
+        .cam-screen-flash {
+            position: fixed;
+            inset: 0;
+            background: #fff9eb;
+            z-index: 25000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease;
+        }
+
+        .cam-screen-flash.active {
+            opacity: 0.92;
+        }
+
         /* === VIGNETTE & FLARE === */
         .vignette-overlay {
             position: fixed;
@@ -2439,9 +2555,18 @@
         </div>
     </div>
 
+    <!-- SCREEN FLASH UNTUK SELFIE KAMERA DEPAN -->
+    <div id="cam-screen-flash" class="cam-screen-flash"></div>
+
     <!-- LAYAR KAMERA TEMPLATE (TERBUKA OTOMATIS DARI QR HP) -->
     <div id="cam-overlay" class="cam-overlay-screen">
         <div class="cam-stage" id="cam-stage">
+            <div class="cam-top-bar" id="cam-top-bar">
+                <button type="button" class="cam-icon-btn" id="btn-cam-flash" onclick="toggleCameraFlash()">
+                    ⚡ FLASH: OFF
+                </button>
+            </div>
+
             <video id="cam-video" class="mirrored" autoplay playsinline></video>
             <img id="cam-preview-img" style="display: none;" alt="Hasil Foto">
             
@@ -2458,6 +2583,20 @@
         </div>
 
         <canvas id="cam-export-canvas" style="display: none;"></canvas>
+
+        <div class="cam-tools-panel" id="cam-tools-panel">
+            <div class="cam-zoom-row">
+                <span id="cam-zoom-label">ZOOM 1.0x</span>
+                <input type="range" id="cam-zoom-slider" min="1" max="3" step="0.1" value="1" oninput="updateCameraZoom(this.value)">
+            </div>
+            <div class="cam-filter-row" id="cam-filter-row">
+                <button type="button" class="cam-filter-pill active" data-filter="none" onclick="setBeautyFilter(this, 'none')">Normal</button>
+                <button type="button" class="cam-filter-pill" data-filter="glow" onclick="setBeautyFilter(this, 'glow')">✨ Glowing Aura</button>
+                <button type="button" class="cam-filter-pill" data-filter="soft" onclick="setBeautyFilter(this, 'soft')">🌸 Soft Peach</button>
+                <button type="button" class="cam-filter-pill" data-filter="mystic" onclick="setBeautyFilter(this, 'mystic')">🔮 Mystic Violet</button>
+                <button type="button" class="cam-filter-pill" data-filter="vintage" onclick="setBeautyFilter(this, 'vintage')">📜 Tarot Vintage</button>
+            </div>
+        </div>
 
         <div class="cam-controls" id="cam-live-controls">
             <button class="mystic-btn btn-secondary" onclick="flipCamera()">Balik Kamera</button>
@@ -3257,25 +3396,164 @@
         }
 
         let camStream = null;
+        let camTrack = null;
         let useFrontCamera = true;
+        let isFlashOn = false;
+        let currentZoom = 1.0;
+        let hardwareZoomSupported = false;
+        let currentBeautyPreset = 'none';
         let camPayloadData = null;
+
+        const BEAUTY_FILTERS = {
+            none: {
+                css: "none",
+                tint: null
+            },
+            glow: {
+                css: "brightness(1.13) contrast(0.95) saturate(1.16) sepia(0.08)",
+                tint: "rgba(255, 232, 210, 0.12)"
+            },
+            soft: {
+                css: "brightness(1.10) contrast(0.92) saturate(1.22) hue-rotate(-6deg)",
+                tint: "rgba(255, 192, 203, 0.14)"
+            },
+            mystic: {
+                css: "brightness(1.08) contrast(1.06) saturate(1.25) hue-rotate(12deg)",
+                tint: "rgba(168, 85, 247, 0.14)"
+            },
+            vintage: {
+                css: "brightness(1.05) contrast(1.08) saturate(0.88) sepia(0.24)",
+                tint: "rgba(245, 208, 97, 0.12)"
+            }
+        };
+
+        function applyVideoVisualTransform() {
+            const video = document.getElementById('cam-video');
+            const mirrorScale = useFrontCamera ? -1 : 1;
+            const visualZoom = hardwareZoomSupported ? 1 : currentZoom;
+            video.style.transform = `scaleX(${mirrorScale * visualZoom}) scaleY(${visualZoom})`;
+            video.style.filter = BEAUTY_FILTERS[currentBeautyPreset].css;
+        }
+
+        async function applyHardwareTorch(state) {
+            if (!camTrack) return false;
+            try {
+                const caps = camTrack.getCapabilities ? camTrack.getCapabilities() : {};
+                if (caps.torch) {
+                    await camTrack.applyConstraints({ advanced: [{ torch: state }] });
+                    return true;
+                }
+            } catch (e) {
+                console.warn("Torch tidak didukung:", e);
+            }
+            return false;
+        }
+
+        async function toggleCameraFlash() {
+            isFlashOn = !isFlashOn;
+            const btn = document.getElementById('btn-cam-flash');
+            btn.classList.toggle('active', isFlashOn);
+            btn.innerText = isFlashOn ? "⚡ FLASH: ON" : "⚡ FLASH: OFF";
+
+            if (!useFrontCamera) {
+                await applyHardwareTorch(isFlashOn);
+            }
+        }
+
+        async function updateCameraZoom(val) {
+            currentZoom = parseFloat(val);
+            document.getElementById('cam-zoom-label').innerText = `ZOOM ${currentZoom.toFixed(1)}x`;
+
+            if (hardwareZoomSupported && camTrack) {
+                try {
+                    await camTrack.applyConstraints({ advanced: [{ zoom: currentZoom }] });
+                } catch (e) {
+                    hardwareZoomSupported = false;
+                }
+            }
+            applyVideoVisualTransform();
+        }
+
+        function setBeautyFilter(btnEl, presetKey) {
+            currentBeautyPreset = presetKey;
+            document.querySelectorAll('.cam-filter-pill').forEach(p => p.classList.remove('active'));
+            btnEl.classList.add('active');
+            applyVideoVisualTransform();
+        }
 
         async function startTemplateCamera() {
             if (camStream) {
                 camStream.getTracks().forEach(track => track.stop());
+                camStream = null;
+                camTrack = null;
             }
-            const video = document.getElementById('cam-video');
-            video.classList.toggle('mirrored', useFrontCamera);
 
-            try {
-                camStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: useFrontCamera ? "user" : "environment" },
-                    audio: false
-                });
-                video.srcObject = camStream;
-            } catch (err) {
-                showCustomAlert("Izin kamera ditolak atau tidak tersedia di browser ini. Pastikan membuka lewat HTTPS.");
+            const video = document.getElementById('cam-video');
+            const zoomSlider = document.getElementById('cam-zoom-slider');
+            hardwareZoomSupported = false;
+            currentZoom = 1.0;
+            zoomSlider.min = "1";
+            zoomSlider.max = "3";
+            zoomSlider.step = "0.1";
+            zoomSlider.value = "1";
+            document.getElementById('cam-zoom-label').innerText = "ZOOM 1.0x";
+
+            const constraintsList = useFrontCamera
+                ? [
+                    { video: { facingMode: { exact: "user" } }, audio: false },
+                    { video: { facingMode: "user" }, audio: false },
+                    { video: true, audio: false }
+                  ]
+                : [
+                    { video: { facingMode: { exact: "environment" } }, audio: false },
+                    { video: { facingMode: "environment" }, audio: false },
+                    { video: true, audio: false }
+                  ];
+
+            let stream = null;
+            for (const c of constraintsList) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia(c);
+                    if (stream) break;
+                } catch (e) {
+                    continue;
+                }
             }
+
+            if (!stream) {
+                showCustomAlert("Kamera tidak dapat diakses. Pastikan izin kamera aktif dan dibuka lewat HTTPS.");
+                return;
+            }
+
+            camStream = stream;
+            camTrack = stream.getVideoTracks()[0];
+            video.srcObject = stream;
+
+            await new Promise(resolve => {
+                video.onloadedmetadata = () => {
+                    video.play().catch(() => {});
+                    resolve();
+                };
+            });
+
+            if (camTrack && camTrack.getCapabilities) {
+                const caps = camTrack.getCapabilities();
+                if (caps.zoom && caps.zoom.max > caps.zoom.min) {
+                    hardwareZoomSupported = true;
+                    zoomSlider.min = caps.zoom.min;
+                    zoomSlider.max = Math.min(caps.zoom.max, 5);
+                    zoomSlider.step = caps.zoom.step || 0.1;
+                    zoomSlider.value = caps.zoom.min;
+                    currentZoom = caps.zoom.min;
+                    document.getElementById('cam-zoom-label').innerText = `ZOOM ${Number(currentZoom).toFixed(1)}x`;
+                }
+            }
+
+            if (!useFrontCamera && isFlashOn) {
+                await applyHardwareTorch(true);
+            }
+
+            applyVideoVisualTransform();
         }
 
         function flipCamera() {
@@ -3283,11 +3561,17 @@
             startTemplateCamera();
         }
 
-        function captureTemplatePhoto() {
+        async function captureTemplatePhoto() {
             const video = document.getElementById('cam-video');
             const previewImg = document.getElementById('cam-preview-img');
             const canvas = document.getElementById('cam-export-canvas');
             const ctx = canvas.getContext('2d');
+            const screenFlash = document.getElementById('cam-screen-flash');
+
+            if (isFlashOn && useFrontCamera) {
+                screenFlash.classList.add('active');
+                await new Promise(r => setTimeout(r, 220));
+            }
 
             const W = 1080;
             const H = 1920;
@@ -3308,13 +3592,35 @@
                 sy = (vh - sh) / 2;
             }
 
+            const digitalZoom = hardwareZoomSupported ? 1 : currentZoom;
+            if (digitalZoom > 1) {
+                const zSw = sw / digitalZoom;
+                const zSh = sh / digitalZoom;
+                sx += (sw - zSw) / 2;
+                sy += (sh - zSh) / 2;
+                sw = zSw;
+                sh = zSh;
+            }
+
             ctx.save();
+            ctx.filter = BEAUTY_FILTERS[currentBeautyPreset].css;
             if (useFrontCamera) {
                 ctx.translate(W, 0);
                 ctx.scale(-1, 1);
             }
             ctx.drawImage(video, sx, sy, sw, sh, 0, 0, W, H);
             ctx.restore();
+            ctx.filter = "none";
+
+            const tintColor = BEAUTY_FILTERS[currentBeautyPreset].tint;
+            if (tintColor) {
+                ctx.fillStyle = tintColor;
+                ctx.fillRect(0, 0, W, H);
+            }
+
+            if (isFlashOn && useFrontCamera) {
+                screenFlash.classList.remove('active');
+            }
 
             const topGrad = ctx.createLinearGradient(0, 0, 0, 420);
             topGrad.addColorStop(0, "rgba(11, 4, 20, 0.88)");
@@ -3375,6 +3681,8 @@
             previewImg.src = canvas.toDataURL("image/png");
             video.style.display = "none";
             previewImg.style.display = "block";
+            document.getElementById('cam-top-bar').style.display = "none";
+            document.getElementById('cam-tools-panel').style.display = "none";
             document.getElementById('cam-live-controls').style.display = "none";
             document.getElementById('cam-result-controls').style.display = "flex";
         }
@@ -3382,6 +3690,8 @@
         function retakeTemplatePhoto() {
             document.getElementById('cam-preview-img').style.display = "none";
             document.getElementById('cam-video').style.display = "block";
+            document.getElementById('cam-top-bar').style.display = "flex";
+            document.getElementById('cam-tools-panel').style.display = "flex";
             document.getElementById('cam-result-controls').style.display = "none";
             document.getElementById('cam-live-controls').style.display = "flex";
         }
